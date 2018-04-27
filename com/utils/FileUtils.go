@@ -2,6 +2,11 @@ package utils
 
 import "os"
 
+/*
+	校验文件是否存在
+ */
+
+
 func IsPathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
