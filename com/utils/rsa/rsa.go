@@ -10,6 +10,7 @@ import (
 "os"
 	"io/ioutil"
 	"errors"
+	"sky/com/utils/file"
 )
 
 
@@ -17,12 +18,12 @@ func checkFile() bool{
 
 	 result:=false
 
-	blpub,err:=IsPathExists("public.pem")
+	blpub,err:=file.IsPathExists("public.pem")
 	if err!=nil{
 		log.Fatal("读取公钥文件失败")
 	}
 
-	blpriv,err1:=IsPathExists("private.pem")
+	blpriv,err1:=file.IsPathExists("private.pem")
 	if err1!=nil{
 		log.Fatal("读取私钥文件失败")
 	}
