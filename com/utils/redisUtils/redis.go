@@ -38,6 +38,16 @@ func RedisSetItem(key,data string)bool{
 	return b
 }
 
+func RedisGetItem(key string)string{
+	result, err:= redisConn.Do("GET", key)
+	if err != nil {
+		fmt.Println("redis get failed:", err)
+	}
+	//返回结果为unit8 转成string
+	return string(result.([]byte))
+
+}
+
 func RedisCheckKeyExists(key string)bool{
 	is_key_exit, err := redis.Bool(redisConn.Do("EXISTS", key))
 	if err != nil {
