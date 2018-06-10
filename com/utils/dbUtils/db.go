@@ -5,16 +5,12 @@
 package utils
 
 import (
-"database/sql"
-"fmt"
-"github.com/astaxie/beego"
-_ "github.com/go-sql-driver/mysql"
-
-"strconv"
-"strings"
-
-	"qgtemp/tutils"
-	"qgtemp/conf/contant"
+	"database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"strconv"
+	"strings"
+	"encoding/json"
 )
 
 type DataResult struct {
@@ -33,28 +29,32 @@ func (d *DataResult) GetDataResult() {
 
 }
 
-type SqlResult struct {
+type ObjectResult struct {
 	Msg   string
-	Error int
-	Data  []map[string]string
+	Status int
+	Data  []map[string]interface{}
 }
 
 //获取全局变量db
 var db *sql.DB
 
 //初始化数据库
-func InitMySQLDB(uname, pwd, address, dbName string) {
+func InitMySQLDB(uname, pwd, address, dbName string) error {
 	var err error
 	db, err = sql.Open("mysql", uname+":"+pwd+"@tcp("+address+")/"+dbName+"?charset=utf8")
 
 	if err != nil {
-		beego.Error("openDB error:", err)
-		return
+
+		return err
 	}
 	db.SetMaxOpenConns(2000)
 	db.SetMaxIdleConns(1000)
 	db.Ping()
+	return nil
 }
+/*
+	获取完整sql 语句
+*/
 func GetResultPool(m map[string]string) string {
 	mp := getSql(m)
 
@@ -72,7 +72,8 @@ func GetResultPool(m map[string]string) string {
 	switch mp.Optype {
 	case "1": //查询
 		resultJson := Query(_sql)
-		result = tutils.ResultJson(resultJson)
+		b,_:=json.Marshal(resultJson)
+		fmt.Println(b)
 	case "2": //删除 、修改
 		result = Sql_update(_sql, true)
 	case "3": //添加
@@ -111,7 +112,7 @@ func DBCommon(param *DBParam, resultType bool) interface{} {
 		if resultType {
 			result = resultJson
 		} else {
-			result = tutils.ResultJson2(resultJson)
+			result = ""
 		}
 		fmt.Println("query")
 	case "2": //删除 、修改
@@ -197,42 +198,13 @@ func marryParam(sqlStr string, param []string) string {
 /*
 	从sql字典中获取sql语句，并匹配参数
 */
-func getSql(m map[string]string) *contant.SqlMessage {
-	mp := &contant.SqlMessage{}
+func getSql(m map[string]string) *SqlMessage {
+	mp := &SqlMessage{}
 	if m != nil {
-		mp = contant.GetItemSql(m["key"], m["key1"])
+		mp = GetItemSql(m["key"], m["key1"])
 	}
 	return mp
 }
-
-//
-
-// func pool(w http.ResponseWriter, r *http.Request) {
-//	rows, err := db.Query("SELECT * FROM ns_user limit 1")
-//	defer rows.Close()
-//	checkErr(err)
-//
-//	columns, _ := rows.Columns()
-//	scanArgs := make([]interface{}, len(columns))
-//	values := make([]interface{}, len(columns))
-//	for j := range values {
-//		scanArgs[j] = &values[j]
-//	}
-//
-//	record := make(map[string]string)
-//	for rows.Next() {
-//		//将行数据保存到record字典
-//		err = rows.Scan(scanArgs...)
-//		for i, col := range values {
-//			if col != nil {
-//				record[columns[i]] = string(col.([]byte))
-//			}
-//		}
-//	}
-//
-//	fmt.Println(record)
-//	fmt.Fprintln(w, "finishtttt")
-//}
 
 func checkErr(err error) {
 	if err != nil {

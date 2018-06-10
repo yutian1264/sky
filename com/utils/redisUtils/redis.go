@@ -3,11 +3,13 @@ package utils
 import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	"strings"
+	"log"
 )
 
 var redisConn redis.Conn
 
-func RedisInit(serverPath,port string)bool {
+func RedisInit(serverPath,port ,password string)bool {
 
 	b:=true
 	var err error
@@ -16,6 +18,13 @@ func RedisInit(serverPath,port string)bool {
 		fmt.Println("Connect to redis error", err)
 		return false
 	}
+	if !strings.EqualFold(password,""){
+		if _, err := redisConn.Do("AUTH", password); err != nil {
+			log.Fatalf("check auth error")
+			return false
+		}
+	}
+
 	//defer redisConn.Close()
 
 	return b
@@ -28,7 +37,6 @@ func CheckRedis(){
 
 
 func RedisSetItem(key,data string)bool{
-
 	b:=true
 	_, err:= redisConn.Do("SET", key, data)
 	if err != nil {
@@ -41,8 +49,13 @@ func RedisSetItem(key,data string)bool{
 func RedisGetItem(key string)string{
 	result, err:= redisConn.Do("GET", key)
 	if err != nil {
-		fmt.Println("redis get failed:", err)
+		defer func() {
+			recover();
+			fmt.Println("redis get failed:", err)
+		}()
+		panic("Redis get error")
 	}
+	//fmt.Println(reflect.TypeOf(result))
 	//返回结果为unit8 转成string
 	return string(result.([]byte))
 
