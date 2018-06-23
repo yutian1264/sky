@@ -62,7 +62,7 @@ type SqlMessage struct {
 	Sqltxt  string
 }
 
-func (s SqlList) GetSqlMess() SqlList {
+func (s *SqlList) GetSqlMess() *SqlList {
 
 	return s
 }

@@ -9,18 +9,19 @@ import (
 /*
 	解析本地xml
 */
-func AnalysisXml(path string ,obj interface{}){
+func AnalysisXml(path string ,obj interface{})error{
 	f, err := os.Open(path)
 	if err != nil {
-		panic(err)
+		return err;
 	}
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
-		panic(err)
+		return err;
 	}
 
 	err = xml.Unmarshal(data, obj)
 	if err != nil {
-		panic(err)
+		return err;
 	}
+	return nil;
 }
