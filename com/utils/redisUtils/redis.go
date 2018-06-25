@@ -15,8 +15,12 @@ func RedisInit(serverPath,port ,password string)bool {
 	var err error
 	redisConn, err = redis.Dial("tcp", serverPath+":"+port)
 	if err != nil {
-		fmt.Println("Connect to redis error", err)
-		return false
+		fmt.Println(err)
+		defer func()bool{
+			recover()
+			return false
+		}()
+		panic("No connection could be made because the target machine actively refused it")
 	}
 	if !strings.EqualFold(password,""){
 		if _, err := redisConn.Do("AUTH", password); err != nil {
