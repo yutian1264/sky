@@ -32,7 +32,7 @@ func (d *DataResult) GetDataResult() {
 type ObjectResult struct {
 	Msg   string
 	Status int
-	Data  []map[string]interface{}
+	Data  map[string]interface{}
 }
 
 //获取全局变量db
@@ -63,7 +63,7 @@ func GetResultPool(m map[string]string) string {
 	//解析参数为数组
 	paramArr := strings.Split(param, ",")
 
-	_sql := marryParam(mp.Sqltxt, paramArr)
+	_sql:= marryParam(mp.Sqltxt, paramArr)
 	if m == nil {
 		//未找到当前sql
 		return "{\"Msg\": \"cannot find item sql" + string(m["key"]) + "\",\"Error\": 0,\"Data\":[]}"
@@ -71,7 +71,7 @@ func GetResultPool(m map[string]string) string {
 	var result string
 	switch mp.Optype {
 	case "1": //查询
-		resultJson := Query(_sql)
+		resultJson,_:= Query(_sql)
 		b,_:=json.Marshal(resultJson)
 		fmt.Println(b)
 	case "2": //删除 、修改
@@ -104,11 +104,11 @@ func DBCommon(param *DBParam, resultType bool) interface{} {
 	m["key"] = param.TokenId
 	m["key1"] = param.ItemId
 	mp := getSql(m)
-	_sql := marryParam(mp.Sqltxt, param.Params)
+	_sql:= marryParam(mp.Sqltxt, param.Params)
 	var result interface{}
 	switch mp.Optype {
 	case "1": //查询
-		resultJson := Query(_sql)
+		resultJson,_ := Query(_sql)
 		if resultType {
 			result = resultJson
 		} else {
@@ -152,7 +152,7 @@ func Add(_sql string) string {
 }
 
 //查询数据返回json对象
-func Query(sql string) []map[string]interface{} {
+func Query(sql string)([]map[string]interface{},error ){
 
 	rows, err := db.Query(sql)
 	defer rows.Close()
@@ -166,7 +166,6 @@ func Query(sql string) []map[string]interface{} {
 	}
 	//var num int=0
 	result := []map[string]interface{}{}
-
 	for rows.Next() {
 		record := make(map[string]interface{})
 		//将行数据保存到record字典
@@ -179,7 +178,7 @@ func Query(sql string) []map[string]interface{} {
 		result = append(result, record)
 	}
 
-	return result
+	return result,err
 }
 
 //匹配sql中参数 返回完整sql
@@ -191,6 +190,7 @@ func marryParam(sqlStr string, param []string) string {
 			sqlStr = strings.Replace(sqlStr, "[#"+strconv.Itoa(i+1)+"#]", param[i], -1)
 		}
 	}
+
 
 	return sqlStr
 }
@@ -211,5 +211,16 @@ func checkErr(err error) {
 		fmt.Println(err)
 		panic(err)
 	}
+}
+
+/**
+	获取完整sql
+ */
+func GetFullSql(key,key1 string,param []string)string{
+	mp := &SqlMessage{}
+	if (key != "" && key1!="") {
+		mp = GetItemSql(key, key1)
+	}
+	return marryParam(mp.Sqltxt,param)
 }
 

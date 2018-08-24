@@ -73,7 +73,7 @@ func GetItemByAny(collationName string ,query bson.M)(result interface{},err err
 		return c.Find(query).One(&result)
 	}
 	err = witchCollection(collationName, exop)
-	return
+	return result,err
 }
 
 

@@ -22,7 +22,7 @@ import (
 	"sky/com/utils/file"
 )
 
-func UploadBreakPoint(req *http.Request,key,savePath string){
+func UploadBreakPoint(req *http.Request,key,savePath string,ch chan int){
 	req.ParseForm()
 	forms:=req.Form
 	//b,_:=json.Marshal(forms)
@@ -63,7 +63,9 @@ func UploadBreakPoint(req *http.Request,key,savePath string){
 		isOK,err=saveFile(saveFileName,formFile)
 		if !isOK{
 			log.Println(saveFileName+":保存失败")
+			ch<-0;
 		}
+		ch<-1;
 
 	}else{
 		//整体上传
@@ -73,20 +75,25 @@ func UploadBreakPoint(req *http.Request,key,savePath string){
 		isOK,err=saveFile(saveFileName,formFile)
 		if !isOK{
 			log.Println(saveFileName+":保存失败")
+			ch<-0;
 		}
+		ch<-1;
 	}
 
 	Nothing:{
 		log.Println("nothing")
 		formFile.Close()
+		ch<-1;
 	}
 
 	//如果是分片上传判断是否上传完成,然后组合成完整文件
 	if ok{
 		if chunk==totalChunk-1{
 			assembleFile(header.Filename,savePath,totalChunk)
+			ch<-1;
 		}
 	}
+
 
 }
 //组装上传文件
