@@ -181,6 +181,25 @@ func Query(sql string)([]map[string]interface{},error ){
 	return result,err
 }
 
+func QueryByPage(tname,condition string,pageSize,pageCount int )map[string]interface{}{
+
+	result:=make(map[string]interface{})
+	sql:="select count(*) count from "+tname
+	if len(condition)>0{
+		sql+=" where "+condition
+	}
+	total,_:=Query(sql)
+	sql1:= "select * from "+tname +" where 1=1 "
+	if len(condition)>0{
+		sql+=" and "+condition
+	}
+	sql1+=" limit "+strconv.Itoa(pageSize*pageCount) +","+strconv.Itoa((pageSize+1)*pageCount)
+	data,_:=Query(sql1)
+	result["totalCount"]=total
+	result["data"]=data
+	return result
+}
+
 //匹配sql中参数 返回完整sql
 func marryParam(sqlStr string, param []string) string {
 
