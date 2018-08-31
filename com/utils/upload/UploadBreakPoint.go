@@ -19,7 +19,8 @@ import (
 	"os"
 	"io"
 	"io/ioutil"
-	"sky/com/utils/file"
+	"github.com/yutian1264/sky/com/utils/file"
+	"sky/com/utils"
 )
 
 func UploadBreakPoint(req *http.Request,key,savePath string,ch chan int){
@@ -45,7 +46,7 @@ func UploadBreakPoint(req *http.Request,key,savePath string,ch chan int){
 		tempPath:=savePath+fileName+"_temp/"
 		//如果是分包上传需要保存临时文件,上传完成后组合成一个完整文件
 		saveFileName=tempPath+header.Filename+strconv.Itoa(chunk)+".g"
-		b,_:=file.IsPathExists(saveFileName)
+		b,_:=utils.IsPathExists(saveFileName)
 		if b{
 			log.Println(saveFileName+":文件已经存在")
 			goto Nothing
@@ -100,7 +101,7 @@ func UploadBreakPoint(req *http.Request,key,savePath string,ch chan int){
 func  assembleFile(fileName,path string,totalCount int){
 
 	fileNameTemp:=path+fileName
-	b,_:=file.IsPathExists(fileName)
+	b,_:=utils.IsPathExists(fileName)
 	if b{
 		log.Println("文件已经存在:",fileName)
 		removeTempFile(fileNameTemp+"_temp",totalCount)
