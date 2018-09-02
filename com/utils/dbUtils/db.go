@@ -191,9 +191,9 @@ func QueryByPage(tname,condition string,pageSize,pageCount int )map[string]inter
 	total,_:=Query(sql)
 	sql1:= "select * from "+tname +" where 1=1 "
 	if len(condition)>0{
-		sql+=" and "+condition
+		sql1+=" and "+condition
 	}
-	sql1+=" limit "+strconv.Itoa(pageSize*pageCount) +","+strconv.Itoa((pageSize+1)*pageCount)
+	sql1+=" limit "+strconv.Itoa(pageSize*pageCount) +","+strconv.Itoa(pageCount)
 	data,_:=Query(sql1)
 	result["totalCount"]=total
 	result["data"]=data

@@ -28,7 +28,7 @@ func PathNotExistsCreate(path string) (bool, error) {
 		return true, nil
 	}
 	if os.IsNotExist(err) {
-		err= os.Mkdir(path, os.ModePerm)
+		err= os.MkdirAll(path, os.ModePerm)
 		if err != nil {
 			return false, nil
 		}
@@ -40,23 +40,29 @@ func PathNotExistsCreate(path string) (bool, error) {
 func CreateThumb(path,savePath,saveName string,W,H uint)error {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		recover()
+		log.Println("create thumb open file:",err)
+		file.Close()
+		return err
 	}
 	img, err := jpeg.Decode(file)
 	if err != nil {
-		log.Fatal(err)
+		recover()
+		log.Println("create thumb decode:",err)
+		file.Close()
+		return err
 	}
 	file.Close()
 	m := resize.Resize(W, H, img, resize.Lanczos3)
-	b,_:=PathNotExistsCreate(savePath)
-	if !b{
-		log.Fatal("mkdir failed![%v]\n", err)
-	}
 	out, err := os.Create(savePath+"/"+saveName)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("create thumb:",err)
+		return err
 	}
 	defer out.Close()
 	err=jpeg.Encode(out, m, nil)
+	if err!=nil{
+		recover()
+	}
 	return err
 }

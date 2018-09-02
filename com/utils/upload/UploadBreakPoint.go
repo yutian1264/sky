@@ -19,8 +19,7 @@ import (
 	"os"
 	"io"
 	"io/ioutil"
-	"github.com/yutian1264/sky/com/utils/file"
-	"sky/com/utils"
+	"github.com/yutian1264/sky/com/utils"
 )
 
 func UploadBreakPoint(req *http.Request,key,savePath string,ch chan int){
@@ -51,7 +50,7 @@ func UploadBreakPoint(req *http.Request,key,savePath string,ch chan int){
 			log.Println(saveFileName+":文件已经存在")
 			goto Nothing
 		}
-		b,err:=file.IsPathExists(tempPath)
+		b,err:=utils.IsPathExists(tempPath)
 		if !b{
 			err=os.MkdirAll(tempPath,os.ModePerm)
 			if err!=nil{
