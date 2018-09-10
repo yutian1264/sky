@@ -63,6 +63,7 @@ func CreateThumb(path,savePath,saveName string,W,H uint)error {
 	err=jpeg.Encode(out, m, nil)
 	if err!=nil{
 		recover()
+		return err
 	}
-	return err
+	return nil
 }
