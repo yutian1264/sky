@@ -5,6 +5,9 @@ import (
 	"log"
 	"image/jpeg"
 	"github.com/nfnt/resize"
+	"path/filepath"
+	"github.com/astaxie/beego"
+	"strings"
 )
 
 /*
@@ -66,4 +69,15 @@ func CreateThumb(path,savePath,saveName string,W,H uint)error {
 		return err
 	}
 	return nil
+}
+
+/*
+获取程序运行路径
+*/
+func GetCurrentDirectory() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		beego.Debug(err)
+	}
+	return strings.Replace(dir, "\\", "/", -1)
 }

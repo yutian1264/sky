@@ -68,27 +68,36 @@ func GetResultPool(m map[string]string) string {
 		//未找到当前sql
 		return "{\"Msg\": \"cannot find item sql" + string(m["key"]) + "\",\"Error\": 0,\"Data\":[]}"
 	}
-	var result string
+	 flg:=0
 	switch mp.Optype {
 	case "1": //查询
 		resultJson,_:= Query(_sql)
 		b,_:=json.Marshal(resultJson)
 		fmt.Println(b)
 	case "2": //删除 、修改
-		result = Sql_update(_sql, true)
+		flg,_ = Sql_update(_sql)
 	case "3": //添加
-		result = Add(_sql)
+		flg,_ = Add(_sql)
 	}
-	return result
+	fmt.Println(flg)
+	return ""
 }
 
-func Common(tokenId, itemId string, param []string, isResultObject bool) interface{} {
+func Common(tokenId, itemId string, param []string)interface{}{
 
+	res:=&ResultObject{}
+	if tokenId==""{
+		return res.GetResuleString(0,"tokenid is null","")
+	}
+
+	if itemId==""{
+		return res.GetResuleString(0,"itemId is null","")
+	}
 	p := &DBParam{}
 	p.TokenId = tokenId
 	p.ItemId = itemId
 	p.Params = param
-	result := DBCommon(p, isResultObject)
+	result := DBCommon(p)
 	return result
 }
 
@@ -98,8 +107,7 @@ resultType true []map[string]interface{}
 resultType false  string
 return interface
 */
-func DBCommon(param *DBParam, resultType bool) interface{} {
-
+func DBCommon(param *DBParam) interface{} {
 	m := make(map[string]string)
 	m["key"] = param.TokenId
 	m["key1"] = param.ItemId
@@ -107,48 +115,50 @@ func DBCommon(param *DBParam, resultType bool) interface{} {
 	_sql:= marryParam(mp.Sqltxt, param.Params)
 	var result interface{}
 	switch mp.Optype {
-	case "1": //查询
-		resultJson,_ := Query(_sql)
-		if resultType {
-			result = resultJson
-		} else {
-			result = ""
-		}
-		fmt.Println("query")
-	case "2": //删除 、修改
-		result = Sql_update(_sql, true)
-	case "3": //添加
-		result = Add(_sql)
+		case "1": //查询
+			result,_ = Query(_sql)
+		case "2": //删除 、修改
+			result,_ = Sql_update(_sql)
+		case "3": //添加
+			result,_ = Add(_sql)
 	}
 	return result
 
 }
 
 //删除数据返回删除记录数
-func Sql_update(_sql string, isReturnJson bool) string {
+func Sql_update(_sql string) (int,error) {
 
 	stmt, err := db.Prepare(_sql)
-	checkErr(err)
-	res, err := stmt.Exec()
-	checkErr(err)
-	num, err := res.LastInsertId()
-	checkErr(err)
-
-	if isReturnJson {
-		return "{\"Msg\": \"\",\"Error\": 1,\"Data\":" + strconv.FormatInt(num, 10) + "}"
+	if CheckErr(err){
+		return -1,err
 	}
-	return strconv.Itoa(int(num))
+	res, err := stmt.Exec()
+	if CheckErr(err){
+		return -1,err
+	}
+	num, err := res.LastInsertId()
+	if CheckErr(err){
+		return -1,err
+	}
+	return int(num),nil
 }
 
 //添加信息返回添加信息Id
-func Add(_sql string) string {
+func Add(_sql string) (int,error) {
 	stmt, err := db.Prepare(_sql)
-	checkErr(err)
+	if CheckErr(err){
+		return -1,err
+	}
 	res, err := stmt.Exec()
-	checkErr(err)
+	if CheckErr(err){
+		return -1,err
+	}
 	id, err := res.LastInsertId()
-	checkErr(err)
-	return "{\"Msg\": \"\",\"Error\": 1,\"Data\":" + strconv.FormatInt(id, 10) + "}"
+	if CheckErr(err){
+		return -1,err
+	}
+	return int(id),nil
 }
 
 //查询数据返回json对象
@@ -156,7 +166,7 @@ func Query(sql string)([]map[string]interface{},error ){
 
 	rows, err := db.Query(sql)
 	defer rows.Close()
-	checkErr(err)
+	CheckErr(err)
 
 	columns, _ := rows.Columns()
 	scanArgs := make([]interface{}, len(columns))
@@ -225,11 +235,16 @@ func getSql(m map[string]string) *SqlMessage {
 	return mp
 }
 
-func checkErr(err error) {
+func CheckErr(err error)(bool) {
+
 	if err != nil {
-		fmt.Println(err)
+		defer func()(bool){
+			recover()
+			return false
+		}()
 		panic(err)
 	}
+	return true
 }
 
 /**

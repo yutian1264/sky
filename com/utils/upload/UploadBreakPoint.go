@@ -4,11 +4,7 @@ package upload
 	This method supports sharding upload and single file upload.
 	If single file upload does not require chunks and chunks attributes.
 	Shard uploads support breakpoint continuation
-	post上传
-	该方法支持分片上传和单文件整体上传,如果单文件上传不需要chunk和chunks属性.
-	分片上传支持断点续传
-
- */
+	 */
 
 import (
 	"fmt"

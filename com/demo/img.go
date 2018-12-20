@@ -1,7 +1,7 @@
 package main
 
 import (
-	"sky/com/utils"
+	"github.com/yutian1264/sky/com/utils"
 )
 
 func main() {

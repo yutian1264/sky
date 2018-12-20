@@ -17,3 +17,8 @@ func TimeChange(t1, t2 string) bool {
 	return a.After(b.Add(300 * time.Second))
 }
 
+
+//时间格式化成字符串
+func Time2String(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
+}
