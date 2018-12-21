@@ -11,6 +11,7 @@ import (
 	"log"
 	"github.com/yutian1264/sky/com/utils/scheduler"
 	"time"
+	"github.com/yutian1264/sky/com/utils/timeUtils"
 )
 
 func init() {
@@ -22,7 +23,7 @@ func main() {
 	go scheduler.Cron.Start()
 	//cron.AddFunc(10*int64(time.Second)+time.Now().UnixNano(),run)
 	//scheduler.SchedulerInit()
-	scheduler.Cron.AddFuncSpaceNumber(2,-1,run)
+	scheduler.Cron.AddFuncSpaceNumber(1,-1,run)
 	//cron.AddTask(&scheduler.Task{
 	//	Job: scheduler.FuncJob(func() {
 	//		fmt.Println("hello cron")
@@ -39,7 +40,13 @@ func main() {
 	}
 }
 func run(){
-	log.Println("00000")
+	t1:=timeUtils.Str2Time("2018-12-21 18:00:00")
+	t2:=time.Now()
+	local2, _ := time.LoadLocation("Local")
+	t1=t1.In(local2)
+	t2=t2.In(local2)
+	t3:=t1.Sub(t2)
+	log.Println("下班倒计时:",int(t3.Seconds()),"秒")
 	//run2()
 	//scheduler.Cron.AddFunc(10*int64(time.Second)+time.Now().UnixNano(),run2)
 }
