@@ -36,6 +36,12 @@ type Lock interface {
 	UnLock()
 }
 
+var Cron *OnceCron
+//func SchedulerInit(){
+//	Cron :=NewCron()
+//	go Cron.Start()
+//}
+
 //return old name with OnceCron
 func NewCron() *OnceCron {
 	return &OnceCron{
@@ -57,21 +63,21 @@ func NewScheduler() *TaskScheduler {
 }
 
 //add spacing time job to list with number
-func (scheduler *TaskScheduler) AddFuncSpaceNumber(spaceTime int64, number int, f func()) {
+func (scheduler *TaskScheduler) AddFuncSpaceNumber(spaceTime int64, number int, f func())string {
 	task := getTaskWithFuncSpacingNumber(spaceTime, number, f)
-	scheduler.addTask(task)
+	return scheduler.addTask(task)
 }
 
 //add spacing time job to list with endTime
-func (scheduler *TaskScheduler) AddFuncSpace(spaceTime int64, endTime int64, f func()) {
+func (scheduler *TaskScheduler) AddFuncSpace(spaceTime int64, endTime int64, f func())string {
 	task := getTaskWithFuncSpacing(spaceTime, endTime, f)
-	scheduler.addTask(task)
+	return scheduler.addTask(task)
 }
 
 //add func to list
-func (scheduler *TaskScheduler) AddFunc(unixTime int64, f func()) {
+func (scheduler *TaskScheduler) AddFunc(unixTime int64, f func())string {
 	task := getTaskWithFunc(unixTime, f)
-	scheduler.addTask(task)
+	return scheduler.addTask(task)
 }
 
 //add a task to list
@@ -125,7 +131,6 @@ func (scheduler *TaskScheduler) StopOnce(uuidStr string) {
 
 //run Cron
 func (scheduler *TaskScheduler) Start() {
-	//初始化的時候加入一個一年的長定時器,間隔1小時執行一次
 	task := getTaskWithFuncSpacing(3600, time.Now().Add(time.Hour * 24 * 365).UnixNano(), func() {
 		log.Println("It's a Hour timer!")
 	})
@@ -238,6 +243,9 @@ func (scheduler *TaskScheduler) doAndReset(key int) {
 				nowTask.Number --
 				scheduler.tasks = append(scheduler.tasks, nowTask)
 			} else if nowTask.EndTime >= nowTask.RunTime {
+				scheduler.tasks = append(scheduler.tasks, nowTask)
+			}
+			if nowTask.Number<0{
 				scheduler.tasks = append(scheduler.tasks, nowTask)
 			}
 		}
